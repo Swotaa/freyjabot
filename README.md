@@ -21,15 +21,15 @@ If you want to suggest a correction or just chat with me, you can add me on disc
 
 ### I'll add this part soon...
 #### But in the meantime here are some text explanations :
-In this part **Bold** options are required, _Italic_ ones are optional. "->" Is what the command return.
-- /ping -> 🏓Pong!
+In this part **Bold** options are required, _Italic_ ones are optional. "→" Is what the command return.
+- /ping → 🏓Pong!
 - /event <b>name:</b>Test <b>date:</b>01/01/2042 08:30 <i>description:</i>This is a description <i>location:</i>France <i>duration:</i>5 \
 &nbsp;&nbsp;&nbsp;&nbsp; => Date : Date format should be DD/MM/YYYY HH:mm using 24H format \
 &nbsp;&nbsp;&nbsp;&nbsp; => Duration : Duration is in hours
 - Reminders are set for 7 days, 3 days, 2 days and 1 day before the event
 - /register will add you to the database unless you're already in it
 - /cancelevent <b>event_id:</b>1432536015326289073 (You can find the **event_id** in the creation message)
-- /members -> There are **nb_members** members in this server.
+- /members → There are **nb_members** members in this server.
 
 
 ## Configuration
