@@ -34,8 +34,8 @@ In this part **Bold** options are required, _Italic_ ones are optional. "->" Is 
 
 ## Configuration
 
-Create a `.env` file:
+Create a `.env` file: (see [.env.example](https://github.com/Swotaa/freyjabot/blob/.env.example))
 ```env
 DISCORD_TOKEN=your_discord_token
-DB_URL=database.db
+DB_URL=jdbc:sqlite:database.db
 ```
