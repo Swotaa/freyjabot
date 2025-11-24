@@ -12,7 +12,7 @@ If you want to suggest a correction or just chat with me, you can add me on disc
 
 - Test the bot using **/ping** command (Should reply with 🏓Pong!)
 - Create a scheduled event using the **/event** command (Must give Name and Date, can give Description, Location and Duration)
-- Reminder for the events created simultaneously as the event is created with the **/event** command
+- Reminders for the events are created along with the event (created with the **/event** command)
 - Register a user in the database using the **/register** command (not used atm)
 - Properly cancel and event using the **/cancelevent** command (Cancel from Discord AND delete from database so the reminders are deleted as well)
 - Show members count using **/members** command
