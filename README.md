@@ -2,10 +2,10 @@
 ## Introduction
 
 I made this bot during my 2nd year of computer science studies on my free time. 
-The goal was to create a Discord bot capable of managing a project and providing entertainment features. 
+The goal was to create a Discord bot capable of managing a project and providing entertainment features.
 This project was made using [JDA (Java Discord API)](https://jda.wiki/introduction/jda/).
-I'll try to maintain this code as much as I can and add more functionalities.
-Note that English isn't my first language so the sidenotes in the code, as well as this [readme](https://github.com/Swotaa/freyjabot/blob/master/README.md) can be misspelled or badly written.
+I'll try to maintain this code as much as I can and add more functionalities. \
+Note that English isn't my first language so the sidenotes in the code, as well as this [readme](https://github.com/Swotaa/freyjabot/blob/master/README.md) can be misspelled or badly written. \
 If you want to suggest a correction or just chat with me, you can add me on discord at **swotaa**.
 
 ## Functionalities
