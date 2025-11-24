@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 
-import java.io.ObjectInputFilter;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,17 +23,17 @@ public class EventReminderManager {
     }
 
     // Schedule all reminders for an event
-    public void scheduleReminders(String eventId, String eventName, String eventDate) {
+    public void scheduleReminders(String eventId, String guildId,String eventName, String eventDate) {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
             LocalDateTime eventDateTime = LocalDateTime.parse(eventDate, formatter);
             LocalDateTime now = LocalDateTime.now();
 
             // Schedule reminders: 7 days, 3 days, 2 days, 1 day before
-            scheduleReminder(eventId, eventName, eventDateTime, now, 7);
-            scheduleReminder(eventId, eventName, eventDateTime, now, 3);
-            scheduleReminder(eventId, eventName, eventDateTime, now, 2);
-            scheduleReminder(eventId, eventName, eventDateTime, now, 1);
+            scheduleReminder(eventId, guildId, eventName, eventDateTime, now, 7);
+            scheduleReminder(eventId, guildId, eventName, eventDateTime, now, 3);
+            scheduleReminder(eventId, guildId, eventName, eventDateTime, now, 2);
+            scheduleReminder(eventId, guildId, eventName, eventDateTime, now, 1);
 
             System.out.println("✅ Reminders scheduled for event: " + eventName);
         } catch (Exception e) {
@@ -42,7 +41,7 @@ public class EventReminderManager {
         }
     }
 
-    private void scheduleReminder(String eventId, String eventName,
+    private void scheduleReminder(String eventId, String guildId, String eventName,
                                   LocalDateTime eventDateTime, LocalDateTime now, int daysBeforeEvent) {
 
         LocalDateTime reminderTime = eventDateTime.minusDays(daysBeforeEvent);
@@ -51,17 +50,17 @@ public class EventReminderManager {
         if (reminderTime.isAfter(now)) {
             long delayInSeconds = Duration.between(now, reminderTime).getSeconds();
 
-            scheduler.schedule(() -> {
-                sendReminder(eventName, eventId, daysBeforeEvent);
-            }, delayInSeconds, TimeUnit.SECONDS);
+            scheduler.schedule(() -> sendReminder(eventName, guildId, eventId, daysBeforeEvent), delayInSeconds, TimeUnit.SECONDS);
 
             System.out.println("📅 Reminder scheduled for " + daysBeforeEvent + " days before: " + eventName);
         }
     }
 
-    private void sendReminder(String eventName, String eventId, int daysBeforeEvent) {
+    private void sendReminder(String eventName, String guildId ,String eventId, int daysBeforeEvent) {
         try {
-            Guild guild = jda.getGuilds().getFirst(); // Could be replaced with a SQL query
+            Guild guild = jda.getGuildById(guildId); // Could be replaced with a SQL query
+            // Make sur that guild is defined
+            assert guild != null;
             // Find the #events channel
             TextChannel eventsChannel = guild.getTextChannelsByName("events", true).stream()
                     .findFirst()
@@ -86,10 +85,10 @@ public class EventReminderManager {
 
             String message = emoji + " **Reminder: " + eventName + "**\n" +
                     "📍 Starting in **" + daysBeforeEvent + " day" + (daysBeforeEvent > 1 ? "s" : "") + "**!\n" +
-                    eventLink;
+                    "\uD83E\uDEAA Id : " + eventLink;
 
             eventsChannel.sendMessage(message).queue(
-                    success -> System.out.println("✅ Reminder sent for: " + eventName),
+                    _ -> System.out.println("✅ Reminder sent for: " + eventName),
                     error -> System.err.println("❌ Failed to send reminder: " + error.getMessage())
             );
 
@@ -117,10 +116,11 @@ public class EventReminderManager {
             var rs = db.getAllUpcomingEvents();
             while (rs != null && rs.next()) {
                 String eventId = rs.getString("event_id");
+                String guildId = rs.getString("guild_id");
                 String name = rs.getString("name");
                 String date = rs.getString("date");
 
-                scheduleReminders(eventId, name, date);
+                scheduleReminders(eventId, guildId, name, date);
             }
             System.out.println("✅ Existing events loaded and reminders scheduled!");
         } catch (Exception e) {

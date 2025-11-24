@@ -1,5 +1,6 @@
 package basecode;
 
+import net.dv8tion.jda.api.entities.ScheduledEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.entities.Guild;
@@ -20,19 +21,22 @@ public class MyCommands extends ListenerAdapter
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
     {
-        switch (event.getName())
+        switch (event.getName()) // I am using a switch, but maybe that's not the best option
         {
-            case "ping":
-                event.reply("Pong!").queue();
+            case "ping": // ping to try if the bot is online and working
+                event.reply("\uD83C\uDFD3Pong!").queue();
                 break;
-            case "members":
+            case "members": // useful if you want to know how many people are on your server
                 event.reply("There are " + event.getGuild().getMemberCount() + " members in this server.").queue();
                 break;
-            case "event":
+            case "event": // creates an event and initialises a reminder for it
                 eventCreator(event);
                 break;
-            case "register":
+            case "register": // register a user into the database
                 registerUser(event);
+                break;
+            case "cancelevent": // properly cancel an event from discord and delete the reminders
+                cancelEvent(event);
                 break;
         }
     }
@@ -72,7 +76,8 @@ public class MyCommands extends ListenerAdapter
                                     event.reply("🎉 **New Event Created !**\n" +
                                             "➡\uFE0F\u200B " + name + "\n" +
                                             "📅 " + dateStr + "\n" +
-                                            "📍 " + location).queue();
+                                            "📍 " + location + "\n" +
+                                            "\uD83E\uDEAA " + scheduledEvent.getId() + "\n@everyone").queue();
                                     TextChannel eventsChannel = guild.getTextChannelsByName("events", true).stream().findFirst().orElse(null);
                                     if (eventsChannel != null) {
                                         String eventLink = "https://discord.com/events/" + guild.getId() + "/" + scheduledEvent.getId();
@@ -80,8 +85,8 @@ public class MyCommands extends ListenerAdapter
                                     } else {
                                         event.getChannel().sendMessage("⚠\uFE0F Events channel not found !").queue();
                                     }
-                                    db.saveEvent(scheduledEvent.getId(), name, description, dateStr, location, duration);
-                                    BotMain.getReminderManager().scheduleReminders(scheduledEvent.getId(), name, dateStr);
+                                    db.saveEvent(scheduledEvent.getId(), event.getGuild().getId(), name, description, dateStr, location, duration);
+                                    BotMain.getReminderManager().scheduleReminders(scheduledEvent.getId(), event.getGuild().getId() ,name, dateStr);
                                 },
                             error -> {
                                 event.reply("❌ Error encountered : " + error.getMessage()).setEphemeral(true).queue();
@@ -100,5 +105,22 @@ public class MyCommands extends ListenerAdapter
         db.saveUser(userId, username);
     }
 
+    public void cancelEvent(SlashCommandInteractionEvent event)
+    {
+        String eventId = event.getOption("event_id").getAsString();
+        boolean res = db.deleteEvent(eventId);
+        if(!res)
+        {
+            event.reply("Cannot find any event with id : " + eventId).queue();
+        }
+        else {
+            event.reply("Event \"" + eventId + "\" has been deleted.").queue();
+            Guild guild = event.getGuild();
+            ScheduledEvent scheduledEvent = guild.getScheduledEventById(eventId);
+            if(scheduledEvent != null) {
+                scheduledEvent.delete().queue();
+            }
+        }
+    }
 
 }

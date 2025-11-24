@@ -19,15 +19,19 @@ public class BotMain {
 
         // Disable the fallback logger
         JDALogger.setFallbackLoggerEnabled(false);
+        // Loading the .env file
         Dotenv dotenv = Dotenv.load();
+        // Initialising BOT_TOKEN and DB_URL
         String BOT_TOKEN = dotenv.get("DISCORD_TOKEN");
         String DB_URL = dotenv.get("DB_URL");
 
         System.out.println("🔄 Initializing database...");
+        // Initialising a DatabaseManager
         db = new DatabaseManager(DB_URL);
 
         System.out.println("🔄 Bot is connecting...");
 
+        // Building the bot, initialising status and activity
         JDA bot = JDABuilder.createDefault(BOT_TOKEN)
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .setStatus(OnlineStatus.ONLINE)
@@ -39,9 +43,11 @@ public class BotMain {
         System.out.println("✅ Bot is up and ready!");
 
         System.out.println("🔄 Initializing reminder system...");
+        // This initialises the reminder system
         reminderManager = new EventReminderManager(bot, db);
         reminderManager.loadExistingEvents();
 
+        // Syncing the commands
         bot.updateCommands().addCommands(
                 Commands.slash("members", "Gives the number of members in the server"),
                 Commands.slash("ping", "Pong!"),
@@ -51,7 +57,9 @@ public class BotMain {
                         .addOption(OptionType.STRING, "description", "Description", false)
                         .addOption(OptionType.INTEGER, "duration", "Duration (hours)", false)
                         .addOption(OptionType.STRING, "location", "Event location", false),
-                Commands.slash("register", "Register yourself into the database")
+                Commands.slash("register", "Register yourself into the database"),
+                Commands.slash("cancelevent", "Cancel an event by giving its id")
+                        .addOption(OptionType.STRING, "event_id", "Event id", true)
         ).queue();
 
         System.out.println("\uD83D\uDCDD Commands registered!");
@@ -64,7 +72,7 @@ public class BotMain {
         }));
     }
 
-    // utils for some commands
+    // These are the getter if we need
     public static DatabaseManager getDatabase() {
         return db;
     }
