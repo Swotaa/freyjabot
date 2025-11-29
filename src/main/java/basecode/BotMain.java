@@ -10,13 +10,16 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.internal.utils.JDALogger;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 public class BotMain {
 
     public static DatabaseManager db;
     private static EventReminderManager reminderManager;
 
     public static void main(String[] args) throws Exception {
-
+        SheetConfig.load();
         // Disable the fallback logger
         JDALogger.setFallbackLoggerEnabled(false);
         // Loading the .env file
@@ -59,7 +62,11 @@ public class BotMain {
                         .addOption(OptionType.STRING, "location", "Event location", false),
                 Commands.slash("register", "Register yourself into the database"),
                 Commands.slash("cancelevent", "Cancel an event by giving its id")
-                        .addOption(OptionType.STRING, "event_id", "Event id", true)
+                        .addOption(OptionType.STRING, "event_id", "Event id", true),
+                Commands.slash("testsheets", "Test the connection with the google spreadsheet"),
+                Commands.slash("log", "Add an entry into the Google Sheets")
+                        .addOption(OptionType.INTEGER, "duration", "Duration (minutes)",true)
+                        .addOption(OptionType.STRING, "description", "Description", true)
         ).queue();
 
         System.out.println("\uD83D\uDCDD Commands registered!");

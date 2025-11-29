@@ -5,6 +5,8 @@ target/
 !**/src/test/**/target/
 .kotlin
 .env
+credentials.json
+*json
 
 ### Database ###
 database.db

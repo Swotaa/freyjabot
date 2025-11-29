@@ -11,6 +11,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
 import java.time.LocalDateTime;
 
+import static basecode.SheetManager.logManualWork;
+import static basecode.SheetManager.testConnectionAndWrite;
+
 public class MyCommands extends ListenerAdapter
 {
     private final DatabaseManager db;
@@ -37,6 +40,13 @@ public class MyCommands extends ListenerAdapter
                 break;
             case "cancelevent": // properly cancel an event from discord and delete the reminders
                 cancelEvent(event);
+                break;
+            case "testsheets":
+                testConnectionAndWrite("Test" + event.getMember().toString());
+                event.reply("Test Done");
+                break;
+            case "log":
+                log(event);
                 break;
         }
     }
@@ -123,4 +133,16 @@ public class MyCommands extends ListenerAdapter
         }
     }
 
+    public void log(SlashCommandInteractionEvent event)
+    {
+        boolean res = logManualWork(event.getMember().getIdLong(), event.getMember().getNickname(), event.getOption("duration").getAsInt(), event.getOption("description").getAsString());
+        if (!res)
+        {
+            event.reply("The activity recorder encountered an error...");
+        }
+        else
+        {
+            event.reply("Activity recorded successfully!");
+        }
+    }
 }
