@@ -1,4 +1,4 @@
-package basecode;
+package eu.swota.freyja;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

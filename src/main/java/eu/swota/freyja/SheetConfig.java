@@ -1,4 +1,4 @@
-package basecode;
+package eu.swota.freyja;
 
 import com.google.gson.Gson;
 

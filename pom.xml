@@ -15,7 +15,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>basecode.BotMain</mainClass>
+                    <mainClass>eu.swota.freyja.BotMain</mainClass>
                     <arguments>
                         <argument>--enable-native-access=ALL-UNNAMED</argument>
                     </arguments>
@@ -35,7 +35,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>basecode.BotMain</mainClass>
+                                    <mainClass>eu.swota.freyja.BotMain</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

@@ -1,4 +1,4 @@
-package basecode;
+package eu.swota.freyja;
 
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
@@ -43,7 +43,7 @@ public class SheetManager {
         }
     }
 
-    public static boolean logManualWork(long userId, String username, int minutes, String description) {
+    public static boolean logWork(long userId, String username, String date, String duration, String description) {
         var config = SheetConfig.get();
         var userConfig = config.users.get(String.valueOf(userId));
 
@@ -53,17 +53,13 @@ public class SheetManager {
         }
 
         String startCol = userConfig.startColumn();
-        String endCol = columnLetter(letterToColumn(startCol) + 3); // A→D, F→I, K→N, etc.
+        String endCol = columnLetter(letterToColumn(startCol) + 2); // A→C, E→G, I→K, etc.
         String range = SHEET_NAME + "!" + startCol + ":" + endCol;
-
-        String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        String prettyTime = formatMinutes(minutes);
 
         List<List<Object>> values = List.of(List.of(
                 date,
-                prettyTime,
-                description,
-                minutes
+                duration,
+                description
         ));
 
         try {
@@ -72,7 +68,7 @@ public class SheetManager {
                     .setValueInputOption("RAW")
                     .execute();
 
-            System.out.println(userConfig.name() + " → +" + prettyTime + " – " + description);
+            System.out.println(userConfig.name() + " → +" + duration + " – " + description);
         } catch (Exception e) {
             System.err.println("Cannot write in Sheets for " + userConfig.name());
             e.printStackTrace();
@@ -97,12 +93,6 @@ public class SheetManager {
             index = (index / 26) - 1;
         }
         return col.toString();
-    }
-
-    private static String formatMinutes(int minutes) {
-        int h = minutes / 60;
-        int m = minutes % 60;
-        return h > 0 ? h + "h" + (m > 0 ? m : "") : m + "min";
     }
 
     public static void testConnectionAndWrite(String testerName) {

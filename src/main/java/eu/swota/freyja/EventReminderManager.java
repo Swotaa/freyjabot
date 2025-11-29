@@ -1,4 +1,4 @@
-package basecode;
+package eu.swota.freyja;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
