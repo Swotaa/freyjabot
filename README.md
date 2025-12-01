@@ -6,7 +6,13 @@ The goal was to create a Discord bot capable of managing a project and providing
 This project was made using [JDA (Java Discord API)](https://jda.wiki/introduction/jda/).
 I'll try to maintain this code as much as I can and add more functionalities. \
 Note that English isn't my first language so the sidenotes in the code, as well as this [readme](https://github.com/Swotaa/freyjabot/blob/master/README.md) can be misspelled or badly written. \
-If you want to suggest a correction or just chat with me, you can add me on discord at **swotaa**.
+If you want to suggest a correction or just chat with me, you can reach me on discord : **swotaa**.
+
+## Heads Up
+
+Since I'm French, there is some things that need to be changed to be "international friendly". \
+I'm still studying and that side project is a way to help me manage a school project, so I can't take too much time to internationalise my bot. \
+This doesn't mean that I won't, this means that it is for later (but it'll eventually come dw).
 
 ## Functionalities
 

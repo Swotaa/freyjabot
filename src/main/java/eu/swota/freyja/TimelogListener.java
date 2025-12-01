@@ -11,84 +11,70 @@ import java.util.regex.Pattern;
 
 public class TimelogListener extends ListenerAdapter {
 
+    // So, because I'm French, the name of the channel I use is "activité", but you can change it easily right here dw
     private static final String CHANNEL_NAME = "activité";
-
-    // Regex finale ultra-robuste (corrigée et blindée contre les décalages de groupes)
+    // This is the regex that is used to recognise the "command", cover most of french way to write the day
+    // Note that this is meant for productivity, so it aims at being fast to write.
     private static final Pattern TIMELOG_PATTERN = Pattern.compile(
-            // Jour de la semaine (optionnel)
-            "(?:[Ll]undi|[Mm]ardi|[Mm]ercredi|[Jj]eudi|[Vv]endredi|[Ss]amedi|[Dd]imanche)\\s+" +
-
-                    // Bloc date complet (optionnel)
+            "(?:(?:[Ll]undi|[Mm]ardi|[Mm]ercredi|[Jj]eudi|[Vv]endredi|[Ss]amedi|[Dd]imanche)\\s+)?" +
                     "(?:" +
-                    // Jour du mois (capturé)
-                    "(\\d{1,2})\\s*(?:er|ème)?\\s*[/\\-\\.\\s]\\s*" +
-
-                    // Mois : soit numérique, soit en lettres
-                    "(?:" +
-                    // Variante 1 : mois numérique (ex: 29/11 ou 29-11-2025)
-                    "(\\d{1,2})\\s*(?:[/\\-\\.\\s]\\s*(\\d{2,4})\\s*)?" +
+                    "(\\d{1,2})\\s*[/-\\\\.\\s]\\s*(\\d{1,2})(?:\\s*[/-\\\\.\\s]\\s*(\\d{2,4})\\s*)?" +
                     "|" +
-                    // Variante 2 : mois en lettres (ex: Novembre 2025)
+                    "(\\d{1,2})\\s*(?:er|ème)?\\s+" +
                     "(janv\\.?|févr?\\.?|mars|avr\\.?|mai|juin|juil\\.?|ao[ûu]t|sept?\\.?|oct\\.?|nov\\.?|déc\\.?" +
                     "|Janvier|Février|Mars|Avril|Mai|Juin|Juillet|Août|Septembre|Octobre|Novembre|Décembre)" +
                     "\\s*(?:\\.?\\s*(\\d{2,4})\\s*)?" +
-                    ")\\s*" +  // espace final optionnel
                     ")?" +
-
-                    // Durée obligatoire (2h, 2h30, 90min, etc.)
+                    "\\s*" +
                     "(\\d+[hH]\\d{0,2}|\\d+[hH]|\\d+\\s*min)\\s+" +
-
-                    // Description (tout le reste)
                     "(.+)",
-
             Pattern.CASE_INSENSITIVE
     );
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
-        if (event.getAuthor().isBot()) return;
-        if (!event.getChannel().getName().equalsIgnoreCase(CHANNEL_NAME)) return;
+        if (event.getAuthor().isBot()) return; // Just in case, bots cannot trigger this bot (Freyja)
+        if (!event.getChannel().getName().equalsIgnoreCase(CHANNEL_NAME)) return; // Make sur the good channel is used
 
-        String content = event.getMessage().getContentRaw().trim();
-        Matcher m = TIMELOG_PATTERN.matcher(content);
+        String content = event.getMessage().getContentRaw().trim(); // Get the raw message
+        Matcher m = TIMELOG_PATTERN.matcher(content); // Uses the regex to see if there is a match
 
-        if (!m.find()) return;
+        if (!m.find()) return; // Break the function if it doesn't match
 
         try {
-            LocalDate date = LocalDate.now();
+            LocalDate date = LocalDate.now(); // Recovering the date
 
-            // === Extraction sécurisée de la date ===
-            String jourStr = m.group(1);           // jour du mois (ex: 29)
-            String moisNumStr = m.group(2);        // mois numérique (ou null)
-            String anneeNumStr = m.group(3);       // année après mois numérique (ou null)
-            String moisLettre = m.group(4);        // mois en lettres (ou null)
-            String anneeLettreStr = m.group(5);    // année après mois en lettres (ou null)
+            String jourNum = m.group(1); // Day (30/11) format
+            String moisNum = m.group(2); // Month (30/11) format
+            String anneeNum = m.group(3); // Year (30/11/2025) format (Optional)
+            String jourTexte = m.group(4); // Day Text Format (29 Novembre) -> Novembre = November in French btw
+            String moisTexte = m.group(5); // Month Text Format (29 Novembre) -> Novembre = November in French btw
+            String anneeTexte = m.group(6); // Year Text Format (29 Novembre 2025) -> Still the same
 
-            if (jourStr != null) {
-                int jour = Integer.parseInt(jourStr);
-                int mois = date.getMonthValue();
-                int annee = date.getYear();
-
-                if (moisNumStr != null) {
-                    // Cas : format numérique (ex: 29/11)
-                    mois = Integer.parseInt(moisNumStr);
-                    if (anneeNumStr != null && !anneeNumStr.trim().isEmpty()) {
-                        annee = anneeNumStr.length() == 2 ? 2000 + Integer.parseInt(anneeNumStr)
-                                : Integer.parseInt(anneeNumStr);
-                    }
-                } else if (moisLettre != null) {
-                    // Cas : mois en lettres (ex: Novembre)
-                    mois = moisEnNombre(moisLettre);
-                    if (anneeLettreStr != null && !anneeLettreStr.trim().isEmpty()) {
-                        annee = anneeLettreStr.length() == 2 ? 2000 + Integer.parseInt(anneeLettreStr)
-                                : Integer.parseInt(anneeLettreStr);
-                    }
+            if (jourNum != null && moisNum != null) {
+                // Format : 30/11 or 30/11/2025
+                int j = Integer.parseInt(jourNum);
+                int mo = Integer.parseInt(moisNum);
+                int a = LocalDate.now().getYear();
+                if (anneeNum != null && !anneeNum.isBlank()) {
+                    a = anneeNum.length() == 2 ? 2000 + Integer.parseInt(anneeNum) : Integer.parseInt(anneeNum);
                 }
-                date = LocalDate.of(annee, mois, jour);
-            }
+                date = LocalDate.of(a, mo, j);
 
-            // === Durée ===
-            String dureeRaw = m.group(6).trim().toLowerCase().replaceAll("\\s+", "");
+            } else if (jourTexte != null && moisTexte != null) {
+                // Format : 29 Novembre ou 1er décembre 2025
+                int j = Integer.parseInt(jourTexte);
+                int mo = moisEnNombre(moisTexte);
+                int a = LocalDate.now().getYear();
+                if (anneeTexte != null && !anneeTexte.isBlank()) {
+                    a = anneeTexte.length() == 2 ? 2000 + Integer.parseInt(anneeTexte) : Integer.parseInt(anneeTexte);
+                }
+                date = LocalDate.of(a, mo, j);
+            }
+            // Else → date = today (if none provided)
+
+            // === Duration ===
+            String dureeRaw = m.group(7).trim().toLowerCase().replaceAll("\\s+", "");
             int minutesTotales;
 
             if (dureeRaw.contains("min")) {
@@ -101,12 +87,12 @@ public class TimelogListener extends ListenerAdapter {
             }
 
             String duree = String.format("%dh%02d", minutesTotales / 60, minutesTotales % 60);
-            String description = m.group(7).trim();
+            String description = m.group(8).trim();
 
-            // === Envoi dans Google Sheets ===
+            // === Google Sheets ===
             SheetManager.logWork(
                     event.getMember().getIdLong(),
-                    event.getMember().getNickname(),
+                    event.getMember() != null ? event.getMember().getNickname() : event.getAuthor().getName(),
                     date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                     duree,
                     description
@@ -115,7 +101,9 @@ public class TimelogListener extends ListenerAdapter {
             // === Confirmation ===
             event.getMessage().addReaction(Emoji.fromUnicode("U+2705")).queue();
             event.getChannel().sendMessage(
-                    "Temps enregistré : **" + duree + "** sur *" + description + "*"
+                    "Temps enregistré : **" + duree + "** le *" +
+                            date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) +
+                            "* → " + description
             ).queue();
 
         } catch (Exception e) {

@@ -47,7 +47,7 @@ public class BotMain {
         reminderManager = new EventReminderManager(bot, db);
         reminderManager.loadExistingEvents();
 
-        // Syncing the commands
+        // Syncing slash commands
         bot.updateCommands().addCommands(
                 Commands.slash("members", "Gives the number of members in the server"),
                 Commands.slash("ping", "Pong!"),

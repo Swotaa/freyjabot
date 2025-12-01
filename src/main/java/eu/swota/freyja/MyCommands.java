@@ -40,9 +40,9 @@ public class MyCommands extends ListenerAdapter
             case "cancelevent": // properly cancel an event from discord and delete the reminders
                 cancelEvent(event);
                 break;
-            case "testsheets":
+            case "testsheets": // This command is bad, like doesn't even answer, and you get a discord error message or something
+                // But at least, it is working, writing shit into a sheets.
                 testConnectionAndWrite("Test" + event.getMember().toString());
-                event.reply("Test Done");
                 break;
         }
     }
