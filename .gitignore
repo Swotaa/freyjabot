@@ -6,7 +6,8 @@ target/
 .kotlin
 .env
 credentials.json
-*json
+*.json
+dependency-reduced-pom.xml
 
 ### Database ###
 database.db
