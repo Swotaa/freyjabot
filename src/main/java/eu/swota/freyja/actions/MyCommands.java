@@ -1,5 +1,7 @@
-package eu.swota.freyja;
+package eu.swota.freyja.actions;
 
+import eu.swota.freyja.BotMain;
+import eu.swota.freyja.database.DatabaseManager;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -11,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
 import java.time.LocalDateTime;
 
-import static eu.swota.freyja.SheetManager.testConnectionAndWrite;
+import static eu.swota.freyja.sheets.SheetManager.testConnectionAndWrite;
 
 public class MyCommands extends ListenerAdapter
 {

@@ -1,5 +1,7 @@
-package eu.swota.freyja;
+package eu.swota.freyja.actions;
 
+import eu.swota.freyja.sheets.SheetManager;
+import eu.swota.freyja.sheets.LogCategory;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -13,6 +15,9 @@ public class TimelogListener extends ListenerAdapter {
 
     // So, because I'm French, the name of the channel I use is "activité", but you can change it easily right here dw
     private static final String CHANNEL_NAME = "activité";
+
+
+
     // This is the regex that is used to recognise the "command", cover most of french way to write the day
     // Note that this is meant for productivity, so it aims at being fast to write.
     private static final Pattern TIMELOG_PATTERN = Pattern.compile(
@@ -89,13 +94,15 @@ public class TimelogListener extends ListenerAdapter {
             String duree = String.format("%dh%02d", minutesTotales / 60, minutesTotales % 60);
             String description = m.group(8).trim();
 
+            LogCategory category = detectCategory(description);
             // === Google Sheets ===
             SheetManager.logWork(
                     event.getMember().getIdLong(),
                     event.getMember() != null ? event.getMember().getNickname() : event.getAuthor().getName(),
                     date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")),
                     duree,
-                    description
+                    description,
+                    category.getColour()
             );
 
             // === Confirmation ===
@@ -111,6 +118,26 @@ public class TimelogListener extends ListenerAdapter {
             event.getChannel().sendMessage("Erreur de format, désolé !").queue();
             e.printStackTrace();
         }
+    }
+
+    // Detect the category of the activity
+    private LogCategory detectCategory(String description) {
+        String descLower = description.toLowerCase();
+
+        if (descLower.contains("php")) {
+            return LogCategory.PHP;
+        }
+        if (descLower.contains("api")) {
+            return LogCategory.API;
+        }
+        if (descLower.contains("ef")) {
+            return LogCategory.EF;
+        }
+        if (descLower.contains("gestion")) {
+            return LogCategory.GESTION;
+        }
+
+        return LogCategory.DEFAULT;
     }
 
     private int moisEnNombre(String mois) {

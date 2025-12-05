@@ -1,5 +1,6 @@
-package eu.swota.freyja;
+package eu.swota.freyja.actions;
 
+import eu.swota.freyja.database.DatabaseManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;

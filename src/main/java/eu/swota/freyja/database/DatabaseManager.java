@@ -1,4 +1,4 @@
-package eu.swota.freyja;
+package eu.swota.freyja.database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

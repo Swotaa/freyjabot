@@ -1,4 +1,4 @@
-package eu.swota.freyja;
+package eu.swota.freyja.sheets;
 
 import com.google.gson.Gson;
 

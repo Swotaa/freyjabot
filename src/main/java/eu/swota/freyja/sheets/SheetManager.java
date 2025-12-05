@@ -1,8 +1,8 @@
-package eu.swota.freyja;
+package eu.swota.freyja.sheets;
 
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
-import com.google.api.services.sheets.v4.model.ValueRange;
+import com.google.api.services.sheets.v4.model.*;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.auth.http.HttpCredentialsAdapter;
@@ -43,7 +43,7 @@ public class SheetManager {
         }
     }
 
-    public static boolean logWork(long userId, String username, String date, String duration, String description) {
+    public static boolean logWork(long userId, String username, String date, String duration, String description, String colour) {
         var config = SheetConfig.get();
         var userConfig = config.users.get(String.valueOf(userId));
 
@@ -63,10 +63,31 @@ public class SheetManager {
         ));
 
         try {
-            sheetsService.spreadsheets().values()
+            String updatedRange = sheetsService.spreadsheets().values()
                     .append(SPREADSHEET_ID, range, new ValueRange().setValues(values))
                     .setValueInputOption("RAW")
-                    .execute();
+                    .execute()
+                    .getUpdates().getUpdatedRange();
+
+            String cellRef = updatedRange.split("!")[1].split(":")[0];
+            int rowIndex = Integer.parseInt(cellRef.replaceAll("\\D", "")) - 1;
+            int colIndex = letterToColumn(startCol);
+
+            Request colorRequest = new Request()
+                    .setRepeatCell(new RepeatCellRequest()
+                            .setRange(new GridRange()
+                                    .setSheetId(0)
+                                    .setStartRowIndex(rowIndex)
+                                    .setEndRowIndex(rowIndex + 1)
+                                    .setStartColumnIndex(colIndex)
+                                    .setEndColumnIndex(colIndex + 3))
+                            .setCell(new CellData()
+                                    .setUserEnteredFormat(new CellFormat()
+                                            .setBackgroundColor(hexToColor(colour))))
+                            .setFields("userEnteredFormat.backgroundColor"));
+
+            sheetsService.spreadsheets().batchUpdate(SPREADSHEET_ID,
+                    new BatchUpdateSpreadsheetRequest().setRequests(List.of(colorRequest))).execute();
 
             System.out.println(userConfig.name() + " → +" + duration + " – " + description);
         } catch (Exception e) {
@@ -77,6 +98,14 @@ public class SheetManager {
         return true;
     }
 
+    // Convert String into Color
+    private static Color hexToColor(String hex) {
+        hex = hex.replace("#", "");
+        return new Color()
+                .setRed(Integer.parseInt(hex.substring(0, 2), 16) / 255f)
+                .setGreen(Integer.parseInt(hex.substring(2, 4), 16) / 255f)
+                .setBlue(Integer.parseInt(hex.substring(4, 6), 16) / 255f);
+    }
     // === Convert column A=0, B=1, ..., Z=25, AA=26 ===
     private static int letterToColumn(String col) {
         int column = 0;
