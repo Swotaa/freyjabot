@@ -63,14 +63,20 @@ public class SheetManager {
         ));
 
         try {
-            String updatedRange = sheetsService.spreadsheets().values()
-                    .append(SPREADSHEET_ID, range, new ValueRange().setValues(values))
+            String userColumnRange = SHEET_NAME + "!" + startCol + ":" + startCol;
+            ValueRange userColumnData = sheetsService.spreadsheets().values()
+                    .get(SPREADSHEET_ID, userColumnRange)
+                    .execute();
+            
+            int nextRow = (userColumnData.getValues() != null ? userColumnData.getValues().size() : 0) + 1;
+            String specificRange = SHEET_NAME + "!" + startCol + nextRow + ":" + endCol + nextRow;
+            
+            sheetsService.spreadsheets().values()
+                    .update(SPREADSHEET_ID, specificRange, new ValueRange().setValues(values))
                     .setValueInputOption("RAW")
-                    .execute()
-                    .getUpdates().getUpdatedRange();
+                    .execute();
 
-            String cellRef = updatedRange.split("!")[1].split(":")[0];
-            int rowIndex = Integer.parseInt(cellRef.replaceAll("\\D", "")) - 1;
+            int rowIndex = nextRow - 1;
             int colIndex = letterToColumn(startCol);
 
             Request colorRequest = new Request()
