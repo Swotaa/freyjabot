@@ -1,7 +1,8 @@
 # Freyja Bot
+
 ## Introduction
 
-I made this bot during my 2nd year of computer science studies on my free time. 
+I made this bot during my 2nd year of computer science studies on my free time.
 The goal was to create a Discord bot capable of managing a project and providing entertainment features.
 This project was made using [JDA (Java Discord API)](https://jda.wiki/introduction/jda/).
 I'll try to maintain this code as much as I can and add more functionalities. \
@@ -10,7 +11,7 @@ If you want to suggest a correction or just chat with me, you can reach me on di
 
 ## Heads Up
 
-Since I'm French, there is some things that need to be changed to be "international friendly". \
+Since I'm French, there are some things that need to be changed to be "international friendly". \
 I'm still studying and that side project is a way to help me manage a school project, so I can't take too much time to internationalise my bot. \
 This doesn't mean that I won't, this means that it is for later (but it'll eventually come dw).
 
@@ -26,21 +27,24 @@ This doesn't mean that I won't, this means that it is for later (but it'll event
 ## Examples
 
 ### I'll add this part soon...
-#### But in the meantime here are some text explanations :
-In this part **Bold** options are required, _Italic_ ones are optional. "→" Is what the command return.
+
+#### But in the meantime here are some text explanations
+
+In this part **Bold** options are required, _Italic_ ones are optional. "→" Is what the command returns.
+
 - /ping → 🏓Pong!
-- /event <b>name:</b>Test <b>date:</b>01/01/2042 08:30 <i>description:</i>This is a description <i>location:</i>France <i>duration:</i>5 \
+- /event **name:** Test **date:** 01/01/2042 08:30 _description:_ This is a description _location:_ France _duration:_ 5  
 &nbsp;&nbsp;&nbsp;&nbsp; => Date : Date format should be DD/MM/YYYY HH:mm using 24H format \
 &nbsp;&nbsp;&nbsp;&nbsp; => Duration : Duration is in hours
 - Reminders are set for 7 days, 3 days, 2 days and 1 day before the event
 - /register will add you to the database unless you're already in it
-- /cancelevent <b>event_id:</b>1432536015326289073 (You can find the **event_id** in the creation message)
+- /cancelevent **event_id:**1432536015326289073 (You can find the **event_id** in the creation message)
 - /members → There are **nb_members** members in this server.
-
 
 ## Configuration
 
 Create a `.env` file: (see [.env.example](https://github.com/Swotaa/freyjabot/blob/.env.example))
+
 ```env
 DISCORD_TOKEN=your_discord_token
 DB_URL=jdbc:sqlite:database.db
