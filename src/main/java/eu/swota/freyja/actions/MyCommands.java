@@ -131,4 +131,10 @@ public class MyCommands extends ListenerAdapter
         }
     }
 
+    //TODO: Unfinished
+    public void addIssue(SlashCommandInteractionEvent event)
+    {
+        String issueBoard = event.getOption("board").getAsString();
+    }
+
 }

@@ -46,9 +46,9 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.13.0</version>   <!-- version récente recommandée -->
+            <version>3.13.0</version>
             <configuration>
-                <release>22</release>   <!-- obligatoire avec la propriété release -->
+                <release>22</release>
             </configuration>
         </plugin>
           
