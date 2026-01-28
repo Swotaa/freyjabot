@@ -2,16 +2,28 @@ package eu.swota.freyja.actions;
 
 import eu.swota.freyja.BotMain;
 import eu.swota.freyja.database.DatabaseManager;
+import eu.swota.freyja.sheets.SheetConfig;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
+import net.dv8tion.jda.api.entities.channel.Channel;
+import net.dv8tion.jda.api.entities.channel.attribute.IGuildChannelContainer;
+import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
+import net.dv8tion.jda.api.entities.channel.forums.ForumTag;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static eu.swota.freyja.sheets.SheetManager.testConnectionAndWrite;
 
@@ -41,6 +53,9 @@ public class MyCommands extends ListenerAdapter
                 break;
             case "cancelevent": // properly cancel an event from discord and delete the reminders
                 cancelEvent(event);
+                break;
+            case "addissue":
+                addIssue(event);
                 break;
             case "testsheets": // This command is bad, like doesn't even answer, and you get a discord error message or something
                 // But at least, it is working, writing shit into a sheets.
@@ -131,10 +146,76 @@ public class MyCommands extends ListenerAdapter
         }
     }
 
-    //TODO: Unfinished
     public void addIssue(SlashCommandInteractionEvent event)
     {
-        String issueBoard = event.getOption("board").getAsString();
+        List<ForumTag> validTags = new ArrayList<>();
+        List<String> invalidTags = new ArrayList<>();
+        long forumId = SheetConfig.get().issueBoardId;
+
+        Guild guild = event.getGuild();
+        if (guild == null) {
+            event.reply("This command must be used in a server!").setEphemeral(true).queue();
+            return;
+        }
+
+        ForumChannel forum = guild.getForumChannelById(forumId);
+        if (forum == null) {
+            event.reply("Forum introuvable ou inaccessible").setEphemeral(true).queue();
+            return;
+        }
+
+        String title = event.getOption("title").getAsString();
+        String message = event.getOption("message").getAsString();
+
+
+        OptionMapping opt = event.getOption("tags");
+        if (opt != null) {
+            String[] rawTags = Arrays.stream(opt.getAsString().split(",")).limit(5).toArray(String[]::new);
+
+            for (String raw : rawTags) {
+                String name = raw.trim();
+
+                forum.getAvailableTags().stream()
+                        .filter(t -> t.getName().equalsIgnoreCase(name))
+                        .findFirst()
+                        .ifPresentOrElse(
+                                validTags::add,
+                                () -> invalidTags.add(name)
+                        );
+            }
+        }
+
+        forum.createForumPost(title, MessageCreateData.fromContent(message))
+                .setTags(validTags)
+                .queue();
+
+        StringBuilder recap = new StringBuilder("📌 **Post créé**\n");
+
+        if (!validTags.isEmpty()) {
+            recap.append("✅ Tags ajoutés : ")
+                    .append(
+                            validTags.stream()
+                                    .map(ForumTag::getName)
+                                    .collect(Collectors.joining(", "))
+                    )
+                    .append("\n");
+        }
+
+        if (!invalidTags.isEmpty()) {
+            recap.append("❌ Tags inexistants : ")
+                    .append(String.join(", ", invalidTags))
+                    .append("\n");
+        }
+
+        event.reply(recap.toString())
+                .setEphemeral(true)
+                .queue();
+
+        System.out.printf(
+                "Forum post créé | tags=%s | invalid=%s%n",
+                validTags.stream().map(ForumTag::getName).toList(),
+                invalidTags
+        );
     }
 
 }
