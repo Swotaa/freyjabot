@@ -185,6 +185,8 @@ public class MyCommands extends ListenerAdapter
             }
         }
 
+        db.addIssue(guild.getId(), title, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+
         forum.createForumPost(title, MessageCreateData.fromContent(message))
                 .setTags(validTags)
                 .queue();
@@ -218,4 +220,8 @@ public class MyCommands extends ListenerAdapter
         );
     }
 
+    public void removeIssue(SlashCommandInteractionEvent event)
+    {
+
+    }
 }

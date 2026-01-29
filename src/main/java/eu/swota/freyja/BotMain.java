@@ -66,7 +66,7 @@ public class BotMain {
                 Commands.slash("cancelevent", "Cancel an event by giving its id")
                         .addOption(OptionType.STRING, "event_id", "Event id", true),
                 Commands.slash("testsheets", "Test the connection with the google spreadsheet"),
-                Commands.slash("addIssue", "Add an Issue to the IssueBoard")
+                Commands.slash("addissue", "Add an Issue to the IssueBoard")
                         .addOption(OptionType.STRING, "title", "Title of the Issue", true)
                         .addOption(OptionType.STRING, "message", "Message of the issue", true)
                         .addOption(OptionType.STRING, "tags", "Tags séparés par des virgules (ex: bug,urgent), max 5 par post", false)

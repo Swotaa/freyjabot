@@ -38,6 +38,14 @@ public class DatabaseManager {
             )
         """;
 
+        String createIssueTable = """
+            CREATE TABLE IF NOT EXISTS issues (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            issue_id TEXT NOT NULL,
+            guild_id TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,)
+        """;
+
         String createUsersTable = """
             CREATE TABLE IF NOT EXISTS users (
                 user_id TEXT PRIMARY KEY,
@@ -58,6 +66,7 @@ public class DatabaseManager {
 
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(createEventsTable);
+            stmt.execute(createIssueTable);
             stmt.execute(createUsersTable);
             stmt.execute(createGeoguessrTable);
             System.out.println("✅ Tables created/verified!");
@@ -116,6 +125,60 @@ public class DatabaseManager {
     // This is used by the reminder system
     public ResultSet getAllUpcomingEvents() {
         String sql = "SELECT * FROM events ORDER BY date ASC";
+
+        try {
+            Statement stmt = connection.createStatement();
+            return stmt.executeQuery(sql);
+        } catch (SQLException e) {
+            System.err.println("❌ Query error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public void addIssue(String guildId, String issueId, String date) {
+        String sql = "INSERT INTO issues (guild_id, issue_id, created_at) VALUES (?, ?, ?)";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)){
+            pstmt.setString(1, guildId);
+            pstmt.setString(2, issueId);
+            pstmt.setString(3, date);
+            pstmt.executeUpdate();
+            System.out.println("✅ Issue saved to database!");
+        }
+        catch (SQLException e) {
+            System.err.println("❌ Save error: " + e.getMessage());
+        }
+    }
+
+    public boolean deleteIssue(String guildId, String issueId) {
+        String sql = "DELETE FROM issues WHERE guild_id = ? AND issue_id = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, guildId);
+            pstmt.setString(2, issueId);
+            int affected = pstmt.executeUpdate();
+            return affected > 0;
+        } catch (SQLException e) {
+            System.err.println("❌ Delete error: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public ResultSet getIssueById(String issueId) {
+        String sql = "SELECT * FROM issues WHERE issue_id = ?";
+
+        try {
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setString(1, issueId);
+            return pstmt.executeQuery();
+        } catch (SQLException e) {
+            System.err.println("❌ Query error: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public ResultSet getAllIssues() {
+        String sql = "SELECT * FROM issues ORDER BY created_at ASC";
 
         try {
             Statement stmt = connection.createStatement();
