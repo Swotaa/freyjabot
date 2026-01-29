@@ -69,7 +69,9 @@ public class BotMain {
                 Commands.slash("addissue", "Add an Issue to the IssueBoard")
                         .addOption(OptionType.STRING, "title", "Title of the Issue", true)
                         .addOption(OptionType.STRING, "message", "Message of the issue", true)
-                        .addOption(OptionType.STRING, "tags", "Tags séparés par des virgules (ex: bug,urgent), max 5 par post", false)
+                        .addOption(OptionType.STRING, "tags", "Tags séparés par des virgules (ex: bug,urgent), max 5 par post", false),
+                Commands.slash("removeissue",  "Remove an issue from the issue board")
+                        .addOption(OptionType.STRING, "issue_id", "Issue id", true)
         ).queue();
 
         System.out.println("\uD83D\uDCDD Commands registered!");

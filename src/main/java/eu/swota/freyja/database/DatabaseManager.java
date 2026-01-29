@@ -150,17 +150,15 @@ public class DatabaseManager {
         }
     }
 
-    public boolean deleteIssue(String guildId, String issueId) {
+    public void deleteIssue(String guildId, String issueId) {
         String sql = "DELETE FROM issues WHERE guild_id = ? AND issue_id = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, guildId);
             pstmt.setString(2, issueId);
-            int affected = pstmt.executeUpdate();
-            return affected > 0;
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             System.err.println("❌ Delete error: " + e.getMessage());
-            return false;
         }
     }
 

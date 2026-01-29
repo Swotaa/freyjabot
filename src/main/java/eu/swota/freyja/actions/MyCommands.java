@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.ScheduledEvent;
 import net.dv8tion.jda.api.entities.channel.Channel;
 import net.dv8tion.jda.api.entities.channel.attribute.IGuildChannelContainer;
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.forums.ForumTag;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static eu.swota.freyja.sheets.SheetManager.testConnectionAndWrite;
@@ -56,6 +58,9 @@ public class MyCommands extends ListenerAdapter
                 break;
             case "addissue":
                 addIssue(event);
+                break;
+            case "removeissue":
+                removeIssue(event);
                 break;
             case "testsheets": // This command is bad, like doesn't even answer, and you get a discord error message or something
                 // But at least, it is working, writing shit into a sheets.
@@ -222,6 +227,22 @@ public class MyCommands extends ListenerAdapter
 
     public void removeIssue(SlashCommandInteractionEvent event)
     {
+        String issueId = event.getOption("issue_id").getAsString();
+        Guild guild =  event.getGuild();
 
+        if (guild == null) {
+            event.reply("This command must be used in a server!").setEphemeral(true).queue();
+            return;
+        }
+
+        ThreadChannel thread = guild.getThreadChannelById(issueId);
+        if (thread != null) {
+            thread.delete().queue();
+        }
+
+        db.deleteIssue(guild.getId(), issueId);
+        String msg = String.format("Issue %s has been deleted.", issueId);
+        event.reply(msg).queue();
+        System.out.println(msg);
     }
 }
