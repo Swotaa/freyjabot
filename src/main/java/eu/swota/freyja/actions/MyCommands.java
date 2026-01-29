@@ -3,10 +3,7 @@ package eu.swota.freyja.actions;
 import eu.swota.freyja.BotMain;
 import eu.swota.freyja.database.DatabaseManager;
 import eu.swota.freyja.sheets.SheetConfig;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
-import net.dv8tion.jda.api.entities.channel.Channel;
-import net.dv8tion.jda.api.entities.channel.attribute.IGuildChannelContainer;
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.forums.ForumTag;
@@ -24,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static eu.swota.freyja.sheets.SheetManager.testConnectionAndWrite;
