@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
@@ -33,8 +34,7 @@ public class MyCommands extends ListenerAdapter
     }
 
     @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event)
-    {
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         switch (event.getName()) // I am using a switch, but maybe that's not the best option
         {
             case "ping": // ping to try if the bot is online and working
@@ -65,8 +65,7 @@ public class MyCommands extends ListenerAdapter
         }
     }
 
-    private void eventCreator(SlashCommandInteractionEvent event)
-    {
+    private void eventCreator(SlashCommandInteractionEvent event) {
         String name = event.getOption("name").getAsString();
 
         String dateStr = event.getOption("date").getAsString();
@@ -122,15 +121,13 @@ public class MyCommands extends ListenerAdapter
         }
     }
 
-    public void registerUser(SlashCommandInteractionEvent event)
-    {
+    public void registerUser(SlashCommandInteractionEvent event) {
         String userId = event.getUser().getId();
         String username = event.getUser().getName();
         db.saveUser(userId, username);
     }
 
-    public void cancelEvent(SlashCommandInteractionEvent event)
-    {
+    public void cancelEvent(SlashCommandInteractionEvent event) {
         String eventId = event.getOption("event_id").getAsString();
         boolean res = db.deleteEvent(eventId);
         if(!res)
@@ -147,8 +144,7 @@ public class MyCommands extends ListenerAdapter
         }
     }
 
-    public void addIssue(SlashCommandInteractionEvent event)
-    {
+    public void addIssue(SlashCommandInteractionEvent event) {
         List<ForumTag> validTags = new ArrayList<>();
         List<String> invalidTags = new ArrayList<>();
         long forumId = SheetConfig.get().issueBoardId;
@@ -221,8 +217,7 @@ public class MyCommands extends ListenerAdapter
         );
     }
 
-    public void removeIssue(SlashCommandInteractionEvent event)
-    {
+    public void removeIssue(SlashCommandInteractionEvent event) {
         String issueId = event.getOption("issue_id").getAsString();
         Guild guild =  event.getGuild();
 
@@ -240,5 +235,26 @@ public class MyCommands extends ListenerAdapter
         String msg = String.format("Issue %s has been deleted.", issueId);
         event.reply(msg).queue();
         System.out.println(msg);
+    }
+
+    public void getIssuesId(SlashCommandInteractionEvent event){
+        //TODO: WIP
+        Guild guild = event.getGuild();
+        String[] res;
+        if (guild == null) {
+            event.reply("This command must be used in a server!").setEphemeral(true).queue();
+            return;
+        }
+
+        try {
+            res = (String[]) db.getAllIssues().getArray("issue_id").getArray();
+        } catch (SQLException e) {
+            event.reply("Cannot get issue ids in server!").setEphemeral(true).queue();
+            return;
+        }
+        for(id : res){
+
+        }
+
     }
 }
