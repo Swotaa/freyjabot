@@ -46,9 +46,13 @@ public class MyCommands extends ListenerAdapter
             case "event" -> eventCreator(event);
             case "register" -> registerUser(event);
             case "cancelevent" -> cancelEvent(event);
+
+            // all commands that have to do with issues
             case "addissue" -> addIssue(event);
             case "removeissue" -> removeIssue(event);
             case "listissues" -> getIssuesId(event);
+            case "editissuetags" -> editIssueTags(event);
+
             //test to see of the sheets can be written to
             case "testsheets" -> {
                 event.deferReply(true).queue();
@@ -146,20 +150,10 @@ public class MyCommands extends ListenerAdapter
         }
         String title = event.getOption("title").getAsString();
         String message = event.getOption("message").getAsString();
-        OptionMapping opt = event.getOption("tags");
-        if (opt != null) {
-            String[] rawTags = Arrays.stream(opt.getAsString().split(",")).limit(5).toArray(String[]::new);
-            for (String raw : rawTags) {
-                String name = raw.trim();
-                forum.getAvailableTags().stream()
-                    .filter(t -> t.getName().equalsIgnoreCase(name))
-                    .findFirst()
-                    .ifPresentOrElse(
-                        validTags::add,
-                        () -> invalidTags.add(name)
-                    );
-            }
-        }
+        OptionMapping tags = event.getOption("tags");
+
+        sortTags(tags, forum, validTags, invalidTags);
+
         db.addIssue(guild.getId(), title, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
         forum.createForumPost(title, MessageCreateData.fromContent(message))
             .setTags(validTags)
@@ -227,5 +221,73 @@ public class MyCommands extends ListenerAdapter
             return;
         }
         event.reply(msg.toString()).queue();
+    }
+
+    public void editIssueTags(SlashCommandInteractionEvent event){
+        List<ForumTag> validTagsToAdd = new ArrayList<>();
+        List<ForumTag> validTagsToRemove = new ArrayList<>();
+        List<String> invalidTags = new ArrayList<>();
+        Guild guild = event.getGuild();
+
+        if (guild == null) {
+            event.reply("This command must be used in a server!").setEphemeral(true).queue();
+            return;
+        }
+
+        long forumId = SheetConfig.get().issueBoardId;
+        ForumChannel forum = guild.getForumChannelById(forumId);
+        if (forum == null) {
+            event.reply("Forum introuvable ou inaccessible").setEphemeral(true).queue();
+            return;
+        }
+
+        int postId = event.getOption("issue_id").getAsInt();
+        ThreadChannel thread = guild.getThreadChannelById(postId);
+
+        if (thread == null) {
+            event.reply("Thread introuvable ou inaccessible").setEphemeral(true).queue();
+            return;
+        }
+
+        OptionMapping tagsToAdd = event.getOption("tags_add");
+        OptionMapping tagsToRemove = event.getOption("tags_remove");
+        sortTags(tagsToAdd, forum, validTagsToAdd, invalidTags);
+        sortTags(tagsToRemove, forum, validTagsToRemove, invalidTags);
+
+        List<ForumTag> updatedTags = new ArrayList<>(thread.getAppliedTags());
+
+        updatedTags.removeIf(tag ->
+            validTagsToRemove.stream()
+                .anyMatch(toRemove -> toRemove.getIdLong() == tag.getIdLong())
+        );
+
+        for (ForumTag tagToAdd : validTagsToAdd) {
+            boolean alreadyPresent = updatedTags.stream()
+                .anyMatch(existing -> existing.getIdLong() == tagToAdd.getIdLong());
+
+            if (!alreadyPresent) {
+                updatedTags.add(tagToAdd);
+            }
+        }
+
+        thread.getManager()
+            .setAppliedTags(updatedTags)
+            .queue();
+    }
+
+    private static void sortTags(OptionMapping tags, ForumChannel forum, List<ForumTag> validTags, List<String> invalidTags) {
+        if (tags != null) {
+            String[] rawTags = Arrays.stream(tags.getAsString().split(",")).limit(5).toArray(String[]::new);
+            for (String raw : rawTags) {
+                String name = raw.trim();
+                forum.getAvailableTags().stream()
+                    .filter(t -> t.getName().equalsIgnoreCase(name))
+                    .findFirst()
+                    .ifPresentOrElse(
+                        validTags::add,
+                        () -> invalidTags.add(name)
+                    );
+            }
+        }
     }
 }
