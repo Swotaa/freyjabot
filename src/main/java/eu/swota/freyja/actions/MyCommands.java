@@ -206,6 +206,7 @@ public class MyCommands extends ListenerAdapter
             event.reply("This command must be used in a server!").setEphemeral(true).queue();
             return;
         }
+        event.deferReply(true).queue();
         StringBuilder msg = new StringBuilder("List of issues :\n");
         try {
             ResultSet rs = db.getAllIssues();
@@ -217,10 +218,14 @@ public class MyCommands extends ListenerAdapter
                 }
             }
         } catch (SQLException e) {
-            event.reply("The command ran into an error : " + e.getMessage()).setEphemeral(true).queue();
+            event.getHook()
+                    .sendMessage("The command ran into an error : " + e.getMessage())
+                    .queue();
             return;
         }
-        event.reply(msg.toString()).queue();
+        event.getHook()
+                .sendMessage(msg.toString())
+                .queue();
     }
 
     public void editIssueTags(SlashCommandInteractionEvent event){

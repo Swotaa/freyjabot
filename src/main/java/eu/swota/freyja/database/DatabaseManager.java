@@ -43,7 +43,7 @@ public class DatabaseManager {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             issue_id TEXT NOT NULL,
             guild_id TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,)
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)
         """;
 
         String createUsersTable = """
