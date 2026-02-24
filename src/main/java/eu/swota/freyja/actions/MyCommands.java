@@ -154,33 +154,45 @@ public class MyCommands extends ListenerAdapter
 
         sortTags(tags, forum, validTags, invalidTags);
 
-        db.addIssue(guild.getId(), title, LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
-        forum.createForumPost(title, MessageCreateData.fromContent(message))
-            .setTags(validTags)
-            .queue();
+        event.deferReply(true).queue();
+
         StringBuilder recap = new StringBuilder("📌 **Post créé**\n");
-        if (!validTags.isEmpty()) {
-            recap.append("✅ Tags ajoutés : ")
-                .append(
-                    validTags.stream()
-                        .map(ForumTag::getName)
-                        .collect(Collectors.joining(", "))
-                )
-                .append("\n");
-        }
-        if (!invalidTags.isEmpty()) {
-            recap.append("❌ Tags inexistants : ")
-                .append(String.join(", ", invalidTags))
-                .append("\n");
-        }
-        event.reply(recap.toString())
-            .setEphemeral(true)
-            .queue();
-        System.out.printf(
-            "Forum post créé | tags=%s | invalid=%s%n",
-            validTags.stream().map(ForumTag::getName).toList(),
-            invalidTags
-        );
+
+        forum.createForumPost(title, MessageCreateData.fromContent(message))
+                .setTags(validTags)
+                .queue(post -> {
+
+                    long postId = post.getThreadChannel().getIdLong();
+
+                    // DB update (on peut le faire ici aussi si tu veux être ultra safe)
+                    db.addIssue(
+                            guild.getId(),
+                            String.format("%dd", postId),
+                            LocalDateTime.now().format(
+                                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                            )
+                    );
+
+                    recap.append("🔗 Post : <#").append(postId).append(">\n");
+
+                    if (!validTags.isEmpty()) {
+                        recap.append("✅ Tags ajoutés : ")
+                            .append(validTags.stream()
+                                .map(ForumTag::getName)
+                                .collect(Collectors.joining(", ")))
+                            .append("\n");
+                    }
+
+                    if (!invalidTags.isEmpty()) {
+                        recap.append("❌ Tags inexistants : ")
+                            .append(String.join(", ", invalidTags))
+                            .append("\n");
+                    }
+
+                    event.getHook()
+                        .sendMessage(recap.toString())
+                        .queue();
+                });
     }
 
     public void removeIssue(SlashCommandInteractionEvent event) {
@@ -190,13 +202,17 @@ public class MyCommands extends ListenerAdapter
             event.reply("This command must be used in a server!").setEphemeral(true).queue();
             return;
         }
+        event.deferReply(true).queue();
+
         ThreadChannel thread = guild.getThreadChannelById(issueId);
         if (thread != null) {
             thread.delete().queue();
         }
         db.deleteIssue(guild.getId(), issueId);
         String msg = String.format("Issue %s has been deleted.", issueId);
-        event.reply(msg).queue();
+        event.getHook()
+                .sendMessage(msg)
+                .queue();
         System.out.println(msg);
     }
 
