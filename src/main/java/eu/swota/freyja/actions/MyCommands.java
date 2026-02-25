@@ -164,10 +164,10 @@ public class MyCommands extends ListenerAdapter
 
                     long postId = post.getThreadChannel().getIdLong();
 
-                    // DB update (on peut le faire ici aussi si tu veux être ultra safe)
+                    // DB update (on peut le faire ici aussi si tu veux être ultra safe)1476143932311077005
                     db.addIssue(
                             guild.getId(),
-                            String.format("%dd", postId),
+                            String.format("%d", postId),
                             LocalDateTime.now().format(
                                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
                             )
@@ -226,12 +226,14 @@ public class MyCommands extends ListenerAdapter
         StringBuilder msg = new StringBuilder("List of issues :\n");
         try {
             ResultSet rs = db.getAllIssues();
-            while (rs.next()) {
+            var next = rs.next();
+            while (next) {
                 String issueId = rs.getString("issue_id");
                 ThreadChannel thread = guild.getThreadChannelById(Long.parseLong(issueId));
                 if (thread != null) {
                     msg.append(String.format("%s : %s\n", thread.getName(), issueId));
                 }
+                next = rs.next();
             }
         } catch (SQLException e) {
             event.getHook()
