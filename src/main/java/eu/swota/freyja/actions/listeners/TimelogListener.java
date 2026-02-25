@@ -1,4 +1,4 @@
-package eu.swota.freyja.actions;
+package eu.swota.freyja.actions.listeners;
 
 import eu.swota.freyja.sheets.SheetManager;
 import eu.swota.freyja.sheets.LogCategory;

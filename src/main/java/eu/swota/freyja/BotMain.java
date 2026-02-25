@@ -2,7 +2,8 @@ package eu.swota.freyja;
 
 import eu.swota.freyja.actions.EventReminderManager;
 import eu.swota.freyja.actions.MyCommands;
-import eu.swota.freyja.actions.TimelogListener;
+import eu.swota.freyja.actions.listeners.ThreadListener;
+import eu.swota.freyja.actions.listeners.TimelogListener;
 import eu.swota.freyja.database.DatabaseManager;
 import eu.swota.freyja.sheets.SheetConfig;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -41,7 +42,7 @@ public class BotMain {
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .setStatus(OnlineStatus.ONLINE)
                 .setActivity(Activity.playing("Doom 64"))
-                .addEventListeners(new TimelogListener(), new MyCommands(db))
+                .addEventListeners(new TimelogListener(), new ThreadListener(db), new MyCommands(db))
                 .build();
 
         bot.awaitReady();
