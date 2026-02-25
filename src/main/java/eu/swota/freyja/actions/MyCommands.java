@@ -164,7 +164,7 @@ public class MyCommands extends ListenerAdapter
 
                     long postId = post.getThreadChannel().getIdLong();
 
-                    // DB update (on peut le faire ici aussi si tu veux être ultra safe)1476143932311077005
+                    // DB update (on peut le faire ici aussi si tu veux être ultra safe)
                     db.addIssue(
                             guild.getId(),
                             String.format("%d", postId),
@@ -173,7 +173,9 @@ public class MyCommands extends ListenerAdapter
                             )
                     );
 
-                    recap.append("🔗 Post : <#").append(postId).append(">\n");
+                    String link = "<https://discord.com/channels/%s/%d>"
+                            .formatted(guild.getId(), postId);
+                    recap.append("🔗 Post : ").append(link).append("\n");
 
                     if (!validTags.isEmpty()) {
                         recap.append("✅ Tags ajoutés : ")
