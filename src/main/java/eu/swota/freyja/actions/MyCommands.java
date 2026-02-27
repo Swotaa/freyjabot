@@ -275,6 +275,7 @@ public class MyCommands extends ListenerAdapter
                 .queue();
             return;
         }
+        event.deferReply(true).queue();
 
         OptionMapping tagsToAdd = event.getOption("tags_add");
         OptionMapping tagsToRemove = event.getOption("tags_remove");
@@ -335,13 +336,13 @@ public class MyCommands extends ListenerAdapter
                     if (response.isEmpty()) {
                         response.append("No changes made.");
                     }
-                    event.reply(response.toString())
-                        .setEphemeral(true)
-                        .queue();
+                        event.getHook()
+                            .sendMessage(response.toString())
+                            .queue();
                 },
-                error -> event.reply("Failed to update tags.")
-                    .setEphemeral(true)
-                    .queue()
+                error -> event.getHook()
+                        .sendMessage("Failed to update tags, error : %s".formatted(error.getMessage()))
+                        .queue()
             );
     }
 
