@@ -31,7 +31,7 @@ public class ThreadListener extends ListenerAdapter {
 
         long deletedThreadId = thread.getIdLong();
 
-        System.out.println("Thread supprimé : " + deletedThreadId);
+        System.out.println("Thread deleted : " + deletedThreadId);
         db.deleteIssue(event.getGuild().getId(), thread.getId());
     }
 
@@ -49,7 +49,7 @@ public class ThreadListener extends ListenerAdapter {
 
         long addedThreadId = thread.getIdLong();
 
-        System.out.println("Thread ajouté : " + addedThreadId);
+        System.out.println("Thread added : " + addedThreadId);
         db.addIssue(event.getGuild().getId(), thread.getId(), LocalDateTime.now().toString());
     }
 }

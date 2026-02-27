@@ -57,9 +57,9 @@ public class MyCommands extends ListenerAdapter
             case "testsheets" -> {
                 event.deferReply(true).queue();
                 testConnectionAndWrite("Test" + event.getMember());
-                event.getHook().sendMessage("Test terminé").queue();
+                event.getHook().sendMessage("Test executed").queue();
             }
-            default -> event.reply("Cette commande n'existe pas !").setEphemeral(true).queue();
+            default -> event.reply("This command does not exist !").setEphemeral(true).queue();
         }
     }
 
@@ -134,6 +134,7 @@ public class MyCommands extends ListenerAdapter
         }
     }
 
+    // creates a post
     public void addIssue(SlashCommandInteractionEvent event) {
         List<ForumTag> validTags = new ArrayList<>();
         List<String> invalidTags = new ArrayList<>();
@@ -145,7 +146,7 @@ public class MyCommands extends ListenerAdapter
         }
         ForumChannel forum = guild.getForumChannelById(forumId);
         if (forum == null) {
-            event.reply("Forum introuvable ou inaccessible").setEphemeral(true).queue();
+            event.reply("Forum not found or inaccessible").setEphemeral(true).queue();
             return;
         }
         String title = event.getOption("title").getAsString();
@@ -156,7 +157,7 @@ public class MyCommands extends ListenerAdapter
 
         event.deferReply(true).queue();
 
-        StringBuilder recap = new StringBuilder("📌 **Post créé**\n");
+        StringBuilder recap = new StringBuilder("📌 **Post created**\n");
 
         forum.createForumPost(title, MessageCreateData.fromContent(message))
                 .setTags(validTags)
@@ -164,7 +165,7 @@ public class MyCommands extends ListenerAdapter
 
                     long postId = post.getThreadChannel().getIdLong();
 
-                    // DB update (on peut le faire ici aussi si tu veux être ultra safe)
+                    // DB update (we can do it here as well if you want to be super safe)
                     db.addIssue(
                             guild.getId(),
                             String.format("%d", postId),
@@ -178,7 +179,7 @@ public class MyCommands extends ListenerAdapter
                     recap.append("🔗 Post : ").append(link).append("\n");
 
                     if (!validTags.isEmpty()) {
-                        recap.append("✅ Tags ajoutés : ")
+                        recap.append("✅ Tags added : ")
                             .append(validTags.stream()
                                 .map(ForumTag::getName)
                                 .collect(Collectors.joining(", ")))
@@ -186,7 +187,7 @@ public class MyCommands extends ListenerAdapter
                     }
 
                     if (!invalidTags.isEmpty()) {
-                        recap.append("❌ Tags inexistants : ")
+                        recap.append("❌ Non-existent tags : ")
                             .append(String.join(", ", invalidTags))
                             .append("\n");
                     }
@@ -197,6 +198,7 @@ public class MyCommands extends ListenerAdapter
                 });
     }
 
+    // removes the post
     public void removeIssue(SlashCommandInteractionEvent event) {
         String issueId = event.getOption("issue_id").getAsString();
         Guild guild =  event.getGuild();
@@ -248,6 +250,7 @@ public class MyCommands extends ListenerAdapter
                 .queue();
     }
 
+    // edits a post tags
     public void editIssueTags(SlashCommandInteractionEvent event){
         List<ForumTag> validTagsToAdd = new ArrayList<>();
         List<ForumTag> validTagsToRemove = new ArrayList<>();
@@ -262,7 +265,7 @@ public class MyCommands extends ListenerAdapter
         long forumId = SheetConfig.get().issueBoardId;
         ForumChannel forum = guild.getForumChannelById(forumId);
         if (forum == null) {
-            event.reply("Forum introuvable ou inaccessible").setEphemeral(true).queue();
+            event.reply("Forum not found or inaccessible").setEphemeral(true).queue();
             return;
         }
 
@@ -270,7 +273,7 @@ public class MyCommands extends ListenerAdapter
         ThreadChannel thread = guild.getThreadChannelById(postId);
 
         if (thread == null) {
-            event.reply("Thread introuvable ou inaccessible").setEphemeral(true).queue();
+            event.reply("Thread not found or inaccessible").setEphemeral(true).queue();
             return;
         }
 
