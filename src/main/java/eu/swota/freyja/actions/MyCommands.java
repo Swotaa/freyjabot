@@ -278,35 +278,39 @@ public class MyCommands extends ListenerAdapter
 
         OptionMapping tagsToAdd = event.getOption("tags_add");
         OptionMapping tagsToRemove = event.getOption("tags_remove");
+        System.out.printf("tagsToAdd: %s%n", tagsToAdd);
+        System.out.printf("tagsToRemove: %s%n", tagsToRemove);
 
         sortTags(tagsToAdd, forum, validTagsToAdd, invalidTags);
         sortTags(tagsToRemove, forum, validTagsToRemove, invalidTags);
 
-        List<ForumTag> updatedTags = new ArrayList<>(thread.getAppliedTags());
+        List<ForumTag> ThreadTags = new ArrayList<>(thread.getAppliedTags());
+        System.out.printf("updatedTags: %s%n", ThreadTags);
 
-        updatedTags.removeIf(tag -> {
+        ThreadTags.removeIf(tag -> {
             boolean shouldRemove = validTagsToRemove.stream()
                 .anyMatch(toRemove -> toRemove.getIdLong() == tag.getIdLong());
 
             if (shouldRemove) {
                 actuallyRemoved.add(tag);
             }
-
             return shouldRemove;
         });
+        System.out.printf("removedTags: %s%n", actuallyRemoved);
 
         for (ForumTag tagToAdd : validTagsToAdd) {
-            boolean alreadyPresent = updatedTags.stream()
+            boolean alreadyPresent = ThreadTags.stream()
                 .anyMatch(existing -> existing.getIdLong() == tagToAdd.getIdLong());
 
             if (!alreadyPresent) {
-                updatedTags.add(tagToAdd);
+                ThreadTags.add(tagToAdd);
                 actuallyAdded.add(tagToAdd);
             }
         }
+        System.out.printf("addedTags: %s%n", actuallyAdded);
 
         thread.getManager()
-            .setAppliedTags(updatedTags)
+            .setAppliedTags(ThreadTags)
             .queue(success -> {
                     StringBuilder response = new StringBuilder();
                     if (!actuallyAdded.isEmpty()) {
