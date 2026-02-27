@@ -22,6 +22,7 @@ import java.time.ZoneId;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -165,15 +166,6 @@ public class MyCommands extends ListenerAdapter
 
                     long postId = post.getThreadChannel().getIdLong();
 
-                    // DB update (we can do it here as well if you want to be super safe)
-                    db.addIssue(
-                            guild.getId(),
-                            String.format("%d", postId),
-                            LocalDateTime.now().format(
-                                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
-                            )
-                    );
-
                     String link = "<https://discord.com/channels/%s/%d>"
                             .formatted(guild.getId(), postId);
                     recap.append("🔗 Post : ").append(link).append("\n");
@@ -212,7 +204,6 @@ public class MyCommands extends ListenerAdapter
         if (thread != null) {
             thread.delete().queue();
         }
-        db.deleteIssue(guild.getId(), issueId);
         String msg = String.format("Issue %s has been deleted.", issueId);
         event.getHook()
                 .sendMessage(msg)
@@ -255,17 +246,23 @@ public class MyCommands extends ListenerAdapter
         List<ForumTag> validTagsToAdd = new ArrayList<>();
         List<ForumTag> validTagsToRemove = new ArrayList<>();
         List<String> invalidTags = new ArrayList<>();
+        List<ForumTag> actuallyAdded = new ArrayList<>();
+        List<ForumTag> actuallyRemoved = new ArrayList<>();
         Guild guild = event.getGuild();
 
         if (guild == null) {
-            event.reply("This command must be used in a server!").setEphemeral(true).queue();
+            event.reply("This command must be used in a server!")
+                .setEphemeral(true)
+                .queue();
             return;
         }
 
         long forumId = SheetConfig.get().issueBoardId;
         ForumChannel forum = guild.getForumChannelById(forumId);
         if (forum == null) {
-            event.reply("Forum not found or inaccessible").setEphemeral(true).queue();
+            event.reply("Forum not found or inaccessible")
+                .setEphemeral(true)
+                .queue();
             return;
         }
 
@@ -273,21 +270,30 @@ public class MyCommands extends ListenerAdapter
         ThreadChannel thread = guild.getThreadChannelById(postId);
 
         if (thread == null) {
-            event.reply("Thread not found or inaccessible").setEphemeral(true).queue();
+            event.reply("Thread not found or inaccessible")
+                .setEphemeral(true)
+                .queue();
             return;
         }
 
         OptionMapping tagsToAdd = event.getOption("tags_add");
         OptionMapping tagsToRemove = event.getOption("tags_remove");
+
         sortTags(tagsToAdd, forum, validTagsToAdd, invalidTags);
         sortTags(tagsToRemove, forum, validTagsToRemove, invalidTags);
 
         List<ForumTag> updatedTags = new ArrayList<>(thread.getAppliedTags());
 
-        updatedTags.removeIf(tag ->
-            validTagsToRemove.stream()
-                .anyMatch(toRemove -> toRemove.getIdLong() == tag.getIdLong())
-        );
+        updatedTags.removeIf(tag -> {
+            boolean shouldRemove = validTagsToRemove.stream()
+                .anyMatch(toRemove -> toRemove.getIdLong() == tag.getIdLong());
+
+            if (shouldRemove) {
+                actuallyRemoved.add(tag);
+            }
+
+            return shouldRemove;
+        });
 
         for (ForumTag tagToAdd : validTagsToAdd) {
             boolean alreadyPresent = updatedTags.stream()
@@ -295,17 +301,61 @@ public class MyCommands extends ListenerAdapter
 
             if (!alreadyPresent) {
                 updatedTags.add(tagToAdd);
+                actuallyAdded.add(tagToAdd);
             }
         }
 
         thread.getManager()
             .setAppliedTags(updatedTags)
-            .queue();
+            .queue(success -> {
+                    StringBuilder response = new StringBuilder();
+                    if (!actuallyAdded.isEmpty()) {
+                        response.append("Added: ")
+                            .append(actuallyAdded.stream()
+                                .map(ForumTag::getName)
+                                .toList())
+                            .append("\n");
+                    }
+                    if (!actuallyRemoved.isEmpty()) {
+                        response.append("Removed: ")
+                            .append(actuallyRemoved.stream()
+                                .map(ForumTag::getName)
+                                .toList())
+                            .append("\n");
+                    }
+                    if (!invalidTags.isEmpty()) {
+                        response.append("Invalid: ")
+                            .append(invalidTags)
+                            .append("\n");
+                    }
+                    if (response.isEmpty()) {
+                        response.append("No changes made.");
+                    }
+                    event.reply(response.toString())
+                        .setEphemeral(true)
+                        .queue();
+                },
+                error -> event.reply("Failed to update tags.")
+                    .setEphemeral(true)
+                    .queue()
+            );
     }
 
     private static void sortTags(OptionMapping tags, ForumChannel forum, List<ForumTag> validTags, List<String> invalidTags) {
         if (tags != null) {
-            String[] rawTags = Arrays.stream(tags.getAsString().split(",")).limit(5).toArray(String[]::new);
+            String[] rawTags = Arrays.stream(tags.getAsString().split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toMap(
+                    String::toLowerCase,
+                    s -> s,
+                    (existing, replacement) -> existing,
+                    LinkedHashMap::new
+                ))
+                .values()
+                .stream()
+                .limit(5)
+                .toArray(String[]::new);
             for (String raw : rawTags) {
                 String name = raw.trim();
                 forum.getAvailableTags().stream()
