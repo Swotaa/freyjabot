@@ -1,7 +1,7 @@
 package eu.swota.freyja;
 
 import eu.swota.freyja.actions.EventReminderManager;
-import eu.swota.freyja.actions.MyCommands;
+import eu.swota.freyja.actions.commands.MyCommands;
 import eu.swota.freyja.actions.listeners.ThreadListener;
 import eu.swota.freyja.actions.listeners.TimelogListener;
 import eu.swota.freyja.database.DatabaseManager;
