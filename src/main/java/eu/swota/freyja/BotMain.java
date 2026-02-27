@@ -1,8 +1,9 @@
 package eu.swota.freyja;
 
 import eu.swota.freyja.actions.EventReminderManager;
-import eu.swota.freyja.actions.MyCommands;
-import eu.swota.freyja.actions.TimelogListener;
+import eu.swota.freyja.actions.commands.MyCommands;
+import eu.swota.freyja.actions.listeners.ThreadListener;
+import eu.swota.freyja.actions.listeners.TimelogListener;
 import eu.swota.freyja.database.DatabaseManager;
 import eu.swota.freyja.sheets.SheetConfig;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -41,7 +42,7 @@ public class BotMain {
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT)
                 .setStatus(OnlineStatus.ONLINE)
                 .setActivity(Activity.playing("Doom 64"))
-                .addEventListeners(new TimelogListener(), new MyCommands(db))
+                .addEventListeners(new TimelogListener(), new ThreadListener(db), new MyCommands(db))
                 .build();
 
         bot.awaitReady();
@@ -65,7 +66,18 @@ public class BotMain {
                 Commands.slash("register", "Register yourself into the database"),
                 Commands.slash("cancelevent", "Cancel an event by giving its id")
                         .addOption(OptionType.STRING, "event_id", "Event id", true),
-                Commands.slash("testsheets", "Test the connection with the google spreadsheet")
+                Commands.slash("testsheets", "Test the connection with the google spreadsheet"),
+                Commands.slash("addissue", "Add an Issue to the IssueBoard")
+                        .addOption(OptionType.STRING, "title", "Title of the Issue", true)
+                        .addOption(OptionType.STRING, "message", "Message of the issue", true)
+                        .addOption(OptionType.STRING, "tags", "Tags séparés par des virgules (ex: bug,urgent), max 5 par post", false),
+                Commands.slash("removeissue",  "Remove an issue from the issue board")
+                        .addOption(OptionType.STRING, "issue_id", "Issue id", true),
+                Commands.slash("listissues", "list all the issues"),
+                Commands.slash("editissuetags", "add and remove tags from a specific issue")
+                        .addOption(OptionType.STRING, "issue_id", "Issue id", true)
+                        .addOption(OptionType.STRING, "tags_add", "Tags à ajouter, séparés par des virgules (ex: bug,urgent), max 5 par post", false)
+                        .addOption(OptionType.STRING, "tags_remove", "Tags à supprimer, séparés par des virgules (ex: bug,urgent), max 5 par post", false)
         ).queue();
 
         System.out.println("\uD83D\uDCDD Commands registered!");

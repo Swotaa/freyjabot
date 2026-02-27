@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class SheetConfig {
     public Map<String, UserConfig> users;
+    public long issueBoardId;
 
     public record UserConfig(String name, String startColumn) {}
 
@@ -15,10 +16,23 @@ public class SheetConfig {
     public static void load() {
         try (FileReader reader = new FileReader("config.json")) {
             INSTANCE = new Gson().fromJson(reader, SheetConfig.class);
-            System.out.println("Config chargée : " + INSTANCE.users.size() + " utilisateurs trouvés");
+
+            if (INSTANCE == null) {
+                throw new IllegalStateException("Config vide ou invalide");
+            }
+
+            if (INSTANCE.issueBoardId == 0L) {
+                System.err.println("issueBoard non défini dans config.json");
+            }
+
+            System.out.printf(
+                    "Config chargée : %d utilisateurs trouvés, forum=%d%n",
+                    INSTANCE.users.size(),
+                    INSTANCE.issueBoardId
+            );
+
         } catch (Exception e) {
-            System.err.println("ERREUR : impossible de lire config.json ! Vérifie qu'il est à la racine du projet.");
-            e.printStackTrace();
+            System.err.println(e.getMessage());
             System.exit(1);
         }
     }

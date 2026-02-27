@@ -72,7 +72,7 @@ public class EventReminderManager {
                 return;
             }
 
-            // Create the event link
+            // Create the event link (dunno why i did that)
             String eventLink = "https://discord.com/events/" + guild.getId() + "/" + eventId;
 
             // Choose emoji based on days
@@ -86,7 +86,7 @@ public class EventReminderManager {
 
             String message = emoji + " **Reminder: " + eventName + "**\n" +
                     "📍 Starting in **" + daysBeforeEvent + " day" + (daysBeforeEvent > 1 ? "s" : "") + "**!\n" +
-                    "\uD83E\uDEAA Id : " + eventLink;
+                    "\uD83E\uDEAA Id : " + eventId;
 
             eventsChannel.sendMessage(message).queue(
                     _ -> System.out.println("✅ Reminder sent for: " + eventName),
