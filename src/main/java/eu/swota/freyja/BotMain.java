@@ -67,6 +67,7 @@ public class BotMain {
                         .addOption(OptionType.STRING, "event_id", "Event id", true),
                 Commands.slash("testsheets", "Test the connection with the google spreadsheet"),
                 Commands.slash("hourcount", "Give the time you worked for")
+                        .addOption(OptionType.MENTIONABLE, "user", "User", false)
         ).queue();
 
         System.out.println("\uD83D\uDCDD Commands registered!");

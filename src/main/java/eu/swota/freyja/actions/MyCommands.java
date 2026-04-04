@@ -3,6 +3,7 @@ package eu.swota.freyja.actions;
 import eu.swota.freyja.BotMain;
 import eu.swota.freyja.database.DatabaseManager;
 import net.dv8tion.jda.api.entities.ScheduledEvent;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.entities.Guild;
@@ -49,7 +50,10 @@ public class MyCommands extends ListenerAdapter
                 break;
             case "hourcount": // count user hours registered in the google sheets doc
                 event.deferReply().queue();
-                hourCounter(event);
+                User target = (event.getOption("user") != null)
+                        ? event.getOption("user").getAsUser()
+                        : event.getUser();
+                hourCounter(event, target);
                 break;
         }
     }

@@ -9,8 +9,10 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
+import javax.annotation.Nullable;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -157,7 +159,7 @@ public class SheetManager {
             e.printStackTrace();
         }
     }
-
+    // Parse hours like 2h00 or 2h
     private static double parseHourString(String s) {
         if (s == null || s.trim().isEmpty()) {
             return -1;
@@ -193,15 +195,16 @@ public class SheetManager {
             return -1;
         }
     }
-
-    public static void hourCounter(SlashCommandInteractionEvent event) {
+    // Give the hour count of the user that used the command
+    public static void hourCounter(SlashCommandInteractionEvent event, User user) {
         var config = SheetConfig.get();
-        var userId = event.getUser().getId();
+        var userId = user.getId();
+
         var userConfig = config.users.get(String.valueOf(userId));
 
         if (userConfig == null) {
             event.getHook().sendMessage("❌ User not configured in config.json : "
-                    + event.getUser().getName() + " (" + userId + ")").queue();
+                    + user.getName() + " (" + userId + ")").queue();
             return;
         }
 
@@ -242,7 +245,7 @@ public class SheetManager {
                 }
 
                 String message = String.format("**%s** worked for **%.2f** hours in **%d** entries.",
-                        event.getUser().getEffectiveName(), totalHours, count);
+                        user.getEffectiveName(), totalHours, count);
 
                 event.getHook().sendMessage(message).queue();
 
