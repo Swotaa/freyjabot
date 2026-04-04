@@ -65,7 +65,8 @@ public class BotMain {
                 Commands.slash("register", "Register yourself into the database"),
                 Commands.slash("cancelevent", "Cancel an event by giving its id")
                         .addOption(OptionType.STRING, "event_id", "Event id", true),
-                Commands.slash("testsheets", "Test the connection with the google spreadsheet")
+                Commands.slash("testsheets", "Test the connection with the google spreadsheet"),
+                Commands.slash("hourcount", "Give the time you worked for")
         ).queue();
 
         System.out.println("\uD83D\uDCDD Commands registered!");

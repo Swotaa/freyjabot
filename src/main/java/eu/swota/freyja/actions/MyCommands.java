@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
 import java.time.LocalDateTime;
 
+import static eu.swota.freyja.sheets.SheetManager.hourCounter;
 import static eu.swota.freyja.sheets.SheetManager.testConnectionAndWrite;
 
 public class MyCommands extends ListenerAdapter
@@ -45,6 +46,10 @@ public class MyCommands extends ListenerAdapter
             case "testsheets": // This command is bad, like doesn't even answer, and you get a discord error message or something
                 // But at least, it is working, writing shit into a sheets.
                 testConnectionAndWrite("Test" + event.getMember().toString());
+                break;
+            case "hourcount": // count user hours registered in the google sheets doc
+                event.deferReply().queue();
+                hourCounter(event);
                 break;
         }
     }

@@ -9,10 +9,13 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -153,5 +156,100 @@ public class SheetManager {
             System.err.println("Google Sheets failed :");
             e.printStackTrace();
         }
+    }
+
+    private static double parseHourString(String s) {
+        if (s == null || s.trim().isEmpty()) {
+            return -1;
+        }
+
+        try {
+            s = s.trim().toLowerCase();
+
+            if (!s.contains("h")) {
+                return Double.parseDouble(s);
+            }
+
+            String[] parts = s.split("h");
+
+            int hours = Integer.parseInt(parts[0].trim());
+
+            int minutes = 0;
+            if (parts.length > 1 && !parts[1].trim().isEmpty()) {
+                String minStr = parts[1].trim();
+                if (minStr.length() > 2) {
+                    minStr = minStr.substring(0, 2);
+                }
+                minutes = Integer.parseInt(minStr);
+            }
+
+            if (hours < 0 || minutes < 0 || minutes >= 60) {
+                return -1;
+            }
+
+            return hours + (minutes / 60.0);
+
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    public static void hourCounter(SlashCommandInteractionEvent event) {
+        var config = SheetConfig.get();
+        var userId = event.getUser().getId();
+        var userConfig = config.users.get(String.valueOf(userId));
+
+        if (userConfig == null) {
+            event.getHook().sendMessage("❌ User not configured in config.json : "
+                    + event.getUser().getName() + " (" + userId + ")").queue();
+            return;
+        }
+
+        String startCol = userConfig.startColumn();
+        String hourCol = columnLetter(letterToColumn(startCol) + 1);
+
+        new Thread(() -> {
+            try {
+                String range = SHEET_NAME + "!" + hourCol + "3:" + hourCol;
+
+                ValueRange response = sheetsService.spreadsheets().values()
+                        .get(SPREADSHEET_ID, range)
+                        .execute();
+
+                List<List<Object>> values = response.getValues();
+
+                if (values == null || values.isEmpty()) {
+                    event.getHook().sendMessage("No data found for this user.").queue();
+                    return;
+                }
+
+                double totalHours = 0.0;
+                int count = 0;
+
+                for (List<Object> row : values) {
+                    if (row == null || row.isEmpty()) continue;
+
+                    String cellValue = row.get(0).toString().trim();
+                    if (cellValue.isEmpty()) continue;
+
+                    double hours = parseHourString(cellValue);
+                    if (hours >= 0) {
+                        totalHours += hours;
+                        count++;
+                    } else {
+                        System.out.println("Ignored invalid format: " + cellValue);
+                    }
+                }
+
+                String message = String.format("**%s** worked for **%.2f** hours in **%d** entries.",
+                        event.getUser().getEffectiveName(), totalHours, count);
+
+                event.getHook().sendMessage(message).queue();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                event.getHook().sendMessage("❌ Google Sheets : " + e.getMessage()).queue();
+            }
+        }).start();
     }
 }
