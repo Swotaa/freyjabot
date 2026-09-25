@@ -1,0 +1,8 @@
+{
+    "users": {
+        "discord_id1": { "name": "name1", "startColumn": "A" },
+        "discord_id2": { "name": "name2", "startColumn": "F" },
+        "discord_id3": { "name": "name3", "startColumn": "K" },
+        "discord_id4": { "name": "name4", "startColumn": "P" }
+    }
+}

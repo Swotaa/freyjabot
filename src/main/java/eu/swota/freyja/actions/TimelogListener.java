@@ -13,8 +13,8 @@ import java.util.regex.Pattern;
 
 public class TimelogListener extends ListenerAdapter {
 
-    // So, because I'm French, the name of the channel I use is "activité", but you can change it easily right here dw
-    private static final String CHANNEL_NAME = "activité";
+    // So, because I'm French, the name of the channel I use is "activite", but you can change it easily right here dw
+    private static final String CHANNEL_NAME = "activite";
 
 
 
@@ -91,7 +91,7 @@ public class TimelogListener extends ListenerAdapter {
                 minutesTotales = heures * 60 + minutes;
             }
 
-            String duree = String.format("%dh%02d", minutesTotales / 60, minutesTotales % 60);
+            String duree = String.format("%02d:%02d", minutesTotales / 60, minutesTotales % 60);
             String description = m.group(8).trim();
 
             LogCategory category = detectCategory(description);

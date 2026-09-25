@@ -40,8 +40,25 @@ In this part **Bold** options are required, _Italic_ ones are optional. "→" Is
 
 ## Configuration
 
-Create a `.env` file: (see [.env.example](https://github.com/Swotaa/freyjabot/blob/.env.example))
-```env
-DISCORD_TOKEN=your_discord_token
-DB_URL=jdbc:sqlite:database.db
-```
+### 1. The .env file
+Rename the `.env.example`file: (see [.env.example](https://github.com/Swotaa/freyjabot/blob/.env.example))
+
+You can find a discord bot token on the [Discord Developer Portal](https://discord.com/developers/home).
+
+### 2. The config.json file
+Rename the `config.json.example` file.
+To get the discord_id, you can go on discord and right click on the user. By doing so, you will be able to copy the User ID which is the one we need.
+For the rest, it's up to you. The bot need at least 3 columns per user : time, duration and description.
+In the `config.json.example`, I reserved 5 columns per user because I needed a "total" which is the sum of each duration and one blank column so it's not visually too heavy.
+
+### 3. The credentials.json
+You don't have to create or edit this file, you have to get it from Google Sheets API. If you don't know how to do it, just ask an AI it will most likely help you to get it.
+
+### 4. The discord configuration
+The bot uses some hardcoded values for the listeners or the events.
+You don't have much to do, you only need a `events` channel so you get the reminders and a `activite` one so Freyja listens and counts your hours.
+
+### 5. The final step
+To get a usable snapshot you'll need 2 commands:
+1. `mvn clean package`
+2. `java -jar ./target/FreyjaBot-1.0-SNAPSHOT.jar`
