@@ -54,7 +54,6 @@ public class SheetManager {
 
         String startCol = userConfig.startColumn();
         String endCol = columnLetter(letterToColumn(startCol) + 2); // A→C, E→G, I→K, etc.
-        String range = SHEET_NAME + "!" + startCol + ":" + endCol;
 
         List<List<Object>> values = List.of(List.of(
                 date,
