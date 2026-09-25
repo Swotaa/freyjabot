@@ -14,7 +14,7 @@ Since I'm French, there is some things that need to be changed to be "internatio
 I'm still studying and that side project is a way to help me manage a school project, so I can't take too much time to internationalise my bot. \
 This doesn't mean that I won't, this means that it is for later (but it'll eventually come dw).
 
-## Functionalities
+## Features
 
 - Test the bot using **/ping** command (Should reply with 🏓Pong!)
 - Create a scheduled event using the **/event** command (Must give Name and Date, can give Description, Location and Duration)
